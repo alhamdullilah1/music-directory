@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Song {
+  id           Int          @id @default(autoincrement())
+  title        String
+  artist       String
+  genre        String
+  scale        String?
+  audioUrl     String
+  imageUrl     String?
+  paletteTheme String
+  chords       ChordEvent[]
+  gears        GearEvent[]
+}
+
+model ChordEvent {
+  id        Int    @id @default(autoincrement())
+  songId    Int
+  timestamp Float
+  chordName String
+  song      Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
+
+model GearEvent {
+  id        Int     @id @default(autoincrement())
+  songId    Int
+  timestamp Float
+  guitar    String
+  pedal     String
+  amp       String
+  imageUrl  String?
+  song      Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+}

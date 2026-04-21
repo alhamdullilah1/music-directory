@@ -1,0 +1,203 @@
+@property --bg-primary { syntax: '<color>'; initial-value: #121212; inherits: true; }
+@property --bg-secondary { syntax: '<color>'; initial-value: #1e1e1e; inherits: true; }
+@property --text-primary { syntax: '<color>'; initial-value: #ffffff; inherits: true; }
+@property --text-secondary { syntax: '<color>'; initial-value: #a0a0a0; inherits: true; }
+@property --accent { syntax: '<color>'; initial-value: #ff4757; inherits: true; }
+@property --card-bg { syntax: '<color>'; initial-value: rgba(255, 255, 255, 0.05); inherits: true; }
+@property --border-color { syntax: '<color>'; initial-value: rgba(255, 255, 255, 0.1); inherits: true; }
+@property --glass-bg { syntax: '<color>'; initial-value: rgba(18, 18, 18, 0.7); inherits: true; }
+
+:root {
+  /* Default Theme (Dark Mode) */
+  --bg-image: url('/bg-spiderman.jpg');
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --accent: #ff4757;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(18, 18, 18, 0.7);
+}
+
+/* Summer Meter Palettes */
+body[data-theme="sunset-warm"] {
+  --bg-image: url('/bg-spiderman.jpg');
+  --bg-primary: #ff7e5f;
+  --bg-secondary: #feb47b;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --accent: #ffe259;
+  --card-bg: rgba(255, 255, 255, 0.15);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --glass-bg: rgba(255, 126, 95, 0.7);
+}
+
+body[data-theme="neon-cyberpunk"] {
+  --bg-image: url('/bg-batman.jpg');
+  --bg-primary: #0f0c29;
+  --bg-secondary: #302b63;
+  --text-primary: #00ffcc;
+  --text-secondary: #ff00ff;
+  --accent: #ff00ff;
+  --card-bg: rgba(255, 0, 255, 0.1);
+  --border-color: rgba(0, 255, 204, 0.3);
+  --glass-bg: rgba(15, 12, 41, 0.8);
+}
+
+body[data-theme="vintage-sepia"] {
+  --bg-image: url('/bg-batman.jpg');
+  --bg-primary: #d4c4a8;
+  --bg-secondary: #e6d8b8;
+  --text-primary: #4a3b32;
+  --text-secondary: #705b4a;
+  --accent: #8b4513;
+  --card-bg: rgba(255, 255, 255, 0.3);
+  --border-color: rgba(74, 59, 50, 0.2);
+  --glass-bg: rgba(212, 196, 168, 0.7);
+}
+
+body[data-theme="midnight-blue"] {
+  --bg-image: url('/bg-minato.jpg');
+  --bg-primary: #0f2027;
+  --bg-secondary: #203a43;
+  --text-primary: #ffffff;
+  --text-secondary: #a8c0ff;
+  --accent: #4facfe;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(79, 172, 254, 0.2);
+  --glass-bg: rgba(15, 32, 39, 0.8);
+}
+
+body[data-theme="forest-green"] {
+  --bg-image: url('/bg-minato.jpg');
+  --bg-primary: #134e5e;
+  --bg-secondary: #71b280;
+  --text-primary: #ffffff;
+  --text-secondary: #e0f2e9;
+  --accent: #a8ff78;
+  --card-bg: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(168, 255, 120, 0.2);
+  --glass-bg: rgba(19, 78, 94, 0.8);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  transition: --bg-primary 1.5s ease, --bg-secondary 1.5s ease, --text-primary 0.5s ease, --text-secondary 0.5s ease, --accent 0.5s ease, --card-bg 1s ease, --border-color 1s ease, --glass-bg 1s ease, color 0.5s ease;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background image handling (rotated to landscape) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vh;
+  height: 100vw;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  background: 
+    linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%),
+    var(--bg-image) center/cover no-repeat;
+  z-index: -1;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0); /* Hardware acceleration */
+  will-change: transform;
+}
+
+/* Apply theme colors to the card via a pseudo-element overlay for smooth blending */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  opacity: 0.35;
+  z-index: -1;
+  transition: opacity 0.5s ease;
+  will-change: opacity;
+}
+
+.glass-nav {
+  background: rgba(10, 10, 10, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transform: translateZ(0);
+}
+
+/* Audio Track Animation */
+.track-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.1s linear;
+  position: relative;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.track-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #fff, 0 0 20px var(--accent);
+}
+
+/* Visualizer Bars */
+.visualizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  margin-top: 1rem;
+}
+
+.visualizer .bar {
+  width: 6px;
+  background: var(--accent);
+  border-radius: 3px;
+  animation: equalize 1s infinite;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.visualizer .bar:nth-child(1) { animation-duration: 0.9s; }
+.visualizer .bar:nth-child(2) { animation-duration: 1.1s; }
+.visualizer .bar:nth-child(3) { animation-duration: 0.8s; }
+.visualizer .bar:nth-child(4) { animation-duration: 1.2s; }
+.visualizer .bar:nth-child(5) { animation-duration: 1.0s; }
+
+@keyframes equalize {
+  0% { height: 10px; }
+  50% { height: 40px; }
+  100% { height: 10px; }
+}
