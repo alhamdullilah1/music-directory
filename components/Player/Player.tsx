@@ -18,6 +18,7 @@ type Song = {
   paletteTheme: string;
   chords: any[];
   gears: any[];
+  lyrics?: any[];
 };
 
 interface PlayerProps {
@@ -34,19 +35,40 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
   // New State variables
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeArtist, setActiveArtist] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
   const [sidebarView, setSidebarView] = useState<'Home' | 'Categories' | 'Artists'>('Home');
+  const [volume, setVolume] = useState(70);
+  const [showLyrics, setShowLyrics] = useState(true);
   
   const currentSongIndex = songs.findIndex(s => s.id === selectedSongId);
   const currentSong = songs[currentSongIndex];
 
   // Get Lyrics for current song
-  const lyrics = currentSong ? (songLyrics[currentSong.title] || [{ time: 0, text: "♪ (Instrumental / No Lyrics Found) ♪" }]) : [];
+  const fallbackLyrics = currentSong ? (songLyrics[currentSong.title] || [{ time: 0, text: "♪ (Instrumental / No Lyrics Found) ♪" }]) : [];
+  const dbLyrics = currentSong?.lyrics && currentSong.lyrics.length > 0 ? currentSong.lyrics : null;
+  const lyrics = dbLyrics ? dbLyrics.map(l => ({ time: l.timestamp, text: l.text })) : fallbackLyrics;
+  
   const currentLyric = lyrics.slice().reverse().find(l => currentTime >= l.time)?.text || "♪ (Music) ♪";
 
   useEffect(() => {
     if (currentSong) {
       document.body.setAttribute('data-theme', currentSong.paletteTheme);
+      
+      // Track listening history
+      const cookies = document.cookie.split(';');
+      const authCookie = cookies.find(c => c.trim().startsWith('vibemaker_auth='));
+      if (authCookie) {
+        const email = authCookie.split('=')[1];
+        fetch('/api/play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ songId: currentSong.id, email })
+        }).catch(console.error);
+      }
+
     } else {
       document.body.removeAttribute('data-theme');
     }
@@ -66,6 +88,7 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
   const handleYtReady = (event: any) => {
     setYtPlayer(event.target);
     setDuration(event.target.getDuration());
+    event.target.setVolume(volume);
     if (isPlaying) {
       event.target.playVideo();
     }
@@ -78,7 +101,12 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
     } else if (event.data === 2) {
       setIsPlaying(false);
     } else if (event.data === 0) {
-      nextSong();
+      if (isRepeat) {
+        event.target.seekTo(0);
+        event.target.playVideo();
+      } else {
+        nextSong();
+      }
     }
   };
 
@@ -93,7 +121,12 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
 
   const nextSong = () => {
     if (currentSongIndex === -1) return;
-    const nextIdx = (currentSongIndex + 1) % songs.length;
+    let nextIdx;
+    if (isShuffle) {
+      nextIdx = Math.floor(Math.random() * songs.length);
+    } else {
+      nextIdx = (currentSongIndex + 1) % songs.length;
+    }
     setSelectedSongId(songs[nextIdx].id);
     setCurrentTime(0);
     setIsPlaying(true);
@@ -125,6 +158,13 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
   }
   if (activeArtist !== 'All') {
     filteredSongs = filteredSongs.filter(s => s.artist === activeArtist);
+  }
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filteredSongs = filteredSongs.filter(s => 
+      s.title.toLowerCase().includes(query) || 
+      s.artist.toLowerCase().includes(query)
+    );
   }
 
   return (
@@ -175,7 +215,13 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
             <div style={{ position: 'relative', width: '400px' }}>
               <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input type="text" placeholder="Search for artists, songs, or chords..." style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.4)', color: '#fff', fontSize: '0.9rem', outline: 'none', backdropFilter: 'blur(10px)' }} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for artists, songs, or chords..." 
+                style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.4)', color: '#fff', fontSize: '0.9rem', outline: 'none', backdropFilter: 'blur(10px)' }} 
+              />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>IS</div>
@@ -229,23 +275,25 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
               </div>
 
               {/* Right: Lyrics View */}
-              <div style={{ flex: 1, background: 'rgba(0,0,0,0.4)', borderRadius: '24px', padding: '3rem', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', overflow: 'hidden' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Lyrics</h3>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '1rem' }}>
-                  {lyrics.map((l, i) => (
-                    <p key={i} style={{ 
-                      fontSize: l.text === currentLyric ? '2.5rem' : '1.5rem', 
-                      fontWeight: l.text === currentLyric ? 800 : 600, 
-                      color: l.text === currentLyric ? '#fff' : 'rgba(255,255,255,0.3)',
-                      transition: 'all 0.3s ease',
-                      filter: l.text === currentLyric ? 'none' : 'blur(1px)'
-                    }}>
-                      {l.text}
-                    </p>
-                  ))}
-                  <div style={{ height: '50vh' }} /> {/* Padding for scrolling */}
+              {showLyrics && (
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.4)', borderRadius: '24px', padding: '3rem', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', overflow: 'hidden' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Lyrics</h3>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '1rem' }}>
+                    {lyrics.map((l, i) => (
+                      <p key={i} style={{ 
+                        fontSize: l.text === currentLyric ? '2.5rem' : '1.5rem', 
+                        fontWeight: l.text === currentLyric ? 800 : 600, 
+                        color: l.text === currentLyric ? '#fff' : 'rgba(255,255,255,0.3)',
+                        transition: 'all 0.3s ease',
+                        filter: l.text === currentLyric ? 'none' : 'blur(1px)'
+                      }}>
+                        {l.text}
+                      </p>
+                    ))}
+                    <div style={{ height: '50vh' }} /> {/* Padding for scrolling */}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
           
@@ -417,13 +465,13 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
         {/* Center: Controls & Scrubber */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '40%', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <Shuffle size={20} color="var(--text-secondary)" style={{ cursor: 'pointer' }} />
+            <Shuffle size={20} color={isShuffle ? 'var(--accent)' : 'var(--text-secondary)'} onClick={() => setIsShuffle(!isShuffle)} style={{ cursor: 'pointer' }} />
             <button onClick={prevSong} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><SkipBack size={24} fill="currentColor" /></button>
             <button onClick={togglePlay} style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#fff', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
               {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" style={{ marginLeft: '4px' }} />}
             </button>
             <button onClick={nextSong} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><SkipForward size={24} fill="currentColor" /></button>
-            <Repeat size={20} color="var(--text-secondary)" style={{ cursor: 'pointer' }} />
+            <Repeat size={20} color={isRepeat ? 'var(--accent)' : 'var(--text-secondary)'} onClick={() => setIsRepeat(!isRepeat)} style={{ cursor: 'pointer' }} />
           </div>
           
           <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -445,10 +493,16 @@ export const Player: React.FC<PlayerProps> = ({ songs }) => {
 
         {/* Right: Extra Controls */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', width: '30%' }} onClick={e => e.stopPropagation()}>
-          <Mic2 size={20} color="var(--accent)" style={{ cursor: 'pointer' }} />
+          <Mic2 size={20} color={showLyrics ? 'var(--accent)' : 'var(--text-secondary)'} onClick={() => setShowLyrics(!showLyrics)} style={{ cursor: 'pointer' }} />
           <Volume2 size={20} color="var(--text-secondary)" style={{ cursor: 'pointer' }} />
-          <div style={{ width: '100px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px' }}>
-            <div style={{ width: '70%', height: '100%', background: '#fff', borderRadius: '3px' }} />
+          <div style={{ width: '100px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', cursor: 'pointer', position: 'relative' }}
+               onClick={(e) => {
+                 const rect = e.currentTarget.getBoundingClientRect();
+                 const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                 setVolume(percent * 100);
+                 if (ytPlayer) ytPlayer.setVolume(percent * 100);
+               }}>
+            <div style={{ width: `${volume}%`, height: '100%', background: '#fff', borderRadius: '3px' }} />
           </div>
         </div>
 

@@ -19,6 +19,8 @@ model Song {
   paletteTheme String
   chords       ChordEvent[]
   gears        GearEvent[]
+  lyrics       LyricEvent[]
+  history      PlayHistory[]
 }
 
 model ChordEvent {
@@ -38,4 +40,27 @@ model GearEvent {
   amp       String
   imageUrl  String?
   song      Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
+
+model LyricEvent {
+  id        Int    @id @default(autoincrement())
+  songId    Int
+  timestamp Float
+  text      String
+  song      Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        Int           @id @default(autoincrement())
+  email     String        @unique
+  history   PlayHistory[]
+}
+
+model PlayHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  songId    Int
+  playedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
 }

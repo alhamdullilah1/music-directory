@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding data...');
 
+  await prisma.playHistory.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.lyricEvent.deleteMany();
   await prisma.gearEvent.deleteMany();
   await prisma.chordEvent.deleteMany();
   await prisma.song.deleteMany();
@@ -33,6 +36,14 @@ async function main() {
         create: [
           { timestamp: 0, guitar: 'Fender Stratocaster', pedal: 'Boss CE-2 Chorus', amp: 'Roland JC-120' },
           { timestamp: 10, guitar: 'Fender Stratocaster', pedal: 'Ibanez Tube Screamer', amp: 'Roland JC-120' },
+        ]
+      },
+      lyrics: {
+        create: [
+          { timestamp: 2.0, text: 'Natsu o dakishimete' },
+          { timestamp: 5.0, text: 'Kaze ni fukarete' },
+          { timestamp: 8.0, text: 'Aoi sora no shita de' },
+          { timestamp: 12.0, text: 'Kimi to warai aitai' },
         ]
       }
     },
@@ -225,6 +236,69 @@ async function main() {
       gears: {
         create: [
           { timestamp: 0, guitar: 'Fender Stratocaster', pedal: 'Mu-Tron III', amp: 'Fender Twin Reverb' }
+        ]
+      }
+    },
+    {
+      title: 'Tum Hi Ho',
+      artist: 'Arijit Singh',
+      genre: 'Bollywood',
+      scale: 'F Minor',
+      audioUrl: 'Umqb9KENgmk',
+      imageUrl: getImg('Umqb9KENgmk'),
+      paletteTheme: 'midnight-blue',
+      chords: {
+        create: [
+          { timestamp: 0, chordName: 'Fm' },
+          { timestamp: 14, chordName: 'Eb' },
+          { timestamp: 18, chordName: 'Db' },
+          { timestamp: 22, chordName: 'Fm' },
+          { timestamp: 28, chordName: 'Fm' },
+          { timestamp: 31, chordName: 'Eb' },
+          { timestamp: 35, chordName: 'Cm' },
+          { timestamp: 38, chordName: 'Db' },
+        ]
+      },
+      gears: {
+        create: [
+          { timestamp: 0, guitar: 'Acoustic Guitar', pedal: 'Reverb', amp: 'Direct Input' }
+        ]
+      },
+      lyrics: {
+        create: [
+          { timestamp: 28.5, text: 'Hum tere bin ab reh nahi sakte' },
+          { timestamp: 34.0, text: 'Tere bina kya wajood mera' },
+          { timestamp: 41.0, text: 'Hum tere bin ab reh nahi sakte' },
+          { timestamp: 47.0, text: 'Tere bina kya wajood mera' },
+        ]
+      }
+    },
+    {
+      title: 'Channa Mereya',
+      artist: 'Arijit Singh',
+      genre: 'Bollywood',
+      scale: 'C Minor',
+      audioUrl: 'bzSTpdcs-EI',
+      imageUrl: getImg('bzSTpdcs-EI'),
+      paletteTheme: 'sunset-warm',
+      chords: {
+        create: [
+          { timestamp: 0, chordName: 'Cm' },
+          { timestamp: 5, chordName: 'Bb' },
+          { timestamp: 10, chordName: 'Ab' },
+          { timestamp: 15, chordName: 'Bb' },
+        ]
+      },
+      gears: {
+        create: [
+          { timestamp: 0, guitar: 'Acoustic Guitar', pedal: 'Delay', amp: 'Direct Input' }
+        ]
+      },
+      lyrics: {
+        create: [
+          { timestamp: 18.0, text: 'Acha chalta hoon' },
+          { timestamp: 20.5, text: 'Duaaon mein yaad rakhna' },
+          { timestamp: 24.0, text: 'Mere zikr ka zubaan pe swaad rakhna' },
         ]
       }
     }
