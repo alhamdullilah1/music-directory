@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Music, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
-import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,16 +25,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-zinc-950">
+    <div style={{ 
+      minHeight: '100vh', 
+      width: '100%', 
+      position: 'relative', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      overflow: 'hidden', 
+      background: '#09090b',
+      fontFamily: 'Inter, sans-serif'
+    }}>
       {/* Background Image/Logo with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <Image
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <img
           src="/vibemaker-logo.png"
           alt="Vibemaker Background"
-          fill
-          className="object-cover opacity-20 blur-sm scale-105"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15, filter: 'blur(8px)', transform: 'scale(1.05)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent" />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(9,9,11,1), rgba(9,9,11,0.8), transparent)' }} />
       </div>
 
       {/* Auth Container */}
@@ -43,46 +51,62 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md p-8 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"
+        style={{ 
+          position: 'relative', 
+          zIndex: 10, 
+          width: '100%', 
+          maxWidth: '450px', 
+          padding: '2.5rem', 
+          background: 'rgba(24, 24, 27, 0.5)', 
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.1)', 
+          borderRadius: '24px', 
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' 
+        }}
       >
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20">
-            <Music className="text-white w-8 h-8" />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+          <div style={{ width: '64px', height: '64px', background: 'linear-gradient(to bottom right, #7c3aed, #d946ef)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 10px 15px -3px rgba(139, 92, 246, 0.2)' }}>
+            <Music color="white" size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Vibemaker</h1>
-          <p className="text-zinc-400 text-center text-sm">
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem', margin: 0 }}>Vibemaker</h1>
+          <p style={{ color: '#a1a1aa', textAlign: 'center', fontSize: '0.875rem', margin: 0 }}>
             {isLogin ? "Welcome back to your ultimate music space." : "Join the ultimate music directory today."}
           </p>
         </div>
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider pl-1">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: '0.25rem' }}>Email</label>
+            <div style={{ position: 'relative' }}>
+              <Mail size={20} color="#71717a" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                style={{ width: '100%', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '0.75rem 1rem 0.75rem 3rem', color: 'white', outline: 'none', transition: 'all 0.2s', fontSize: '1rem' }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'; e.currentTarget.style.boxShadow = '0 0 0 1px rgba(139, 92, 246, 0.5)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none'; }}
               />
             </div>
           </div>
 
           {!isLogin && (
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider pl-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: '0.25rem' }}>Password</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={20} color="#71717a" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Create a password"
-                  className="w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                  style={{ width: '100%', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '0.75rem 1rem 0.75rem 3rem', color: 'white', outline: 'none', transition: 'all 0.2s', fontSize: '1rem' }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)'; e.currentTarget.style.boxShadow = '0 0 0 1px rgba(139, 92, 246, 0.5)'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
               </div>
             </div>
@@ -92,9 +116,14 @@ export default function LoginPage() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className={`p-3 rounded-lg text-sm ${
-                message.type === "error" ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              }`}
+              style={{ 
+                padding: '0.75rem', 
+                borderRadius: '8px', 
+                fontSize: '0.875rem', 
+                background: message.type === "error" ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                color: message.type === "error" ? '#f87171' : '#34d399',
+                border: `1px solid ${message.type === "error" ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`
+              }}
             >
               {message.text}
             </motion.div>
@@ -103,28 +132,56 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-white text-black font-semibold rounded-xl hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center group"
+            style={{ 
+              width: '100%', 
+              padding: '0.75rem 1rem', 
+              background: 'white', 
+              color: 'black', 
+              fontWeight: 600, 
+              borderRadius: '12px', 
+              border: 'none', 
+              cursor: isLoading ? 'not-allowed' : 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.5rem',
+              opacity: isLoading ? 0.7 : 1,
+              marginTop: '1rem',
+              fontSize: '1rem'
+            }}
+            onMouseOver={(e) => !isLoading && (e.currentTarget.style.background = '#e4e4e7')}
+            onMouseOut={(e) => !isLoading && (e.currentTarget.style.background = 'white')}
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
               <>
-                {isLogin ? "Send Magic Link" : "Create Account"}
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                {isLogin ? "Sign In" : "Create Account"}
+                <ArrowRight size={18} />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-white/5 text-center">
+        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-zinc-400 hover:text-white transition-colors"
+            style={{ fontSize: '0.875rem', color: '#a1a1aa', background: 'none', border: 'none', cursor: 'pointer' }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'white'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#a1a1aa'}
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
           </button>
         </div>
       </motion.div>
+
+      {/* Global styles for loader animation */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}} />
     </div>
   );
 }
